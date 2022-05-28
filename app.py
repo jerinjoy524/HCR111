@@ -4,15 +4,15 @@ import uuid
 import os
 from tensorflow.keras.models import load_model
 import numpy as np
-from pil import Image
+from PIL import Image
 import base64
 from io import StringIO
 from io import BytesIO
 import cv2
 import pandas as pd
 
-app = Flask(__name__, template_folder='templates')
-model = load_model('hh.h5', compile=True)
+app = Flask(__name__)
+model = load_model('hh.h5',compile=True)
 ascii_map = pd.read_csv("mapping.csv")
 
 
@@ -21,7 +21,7 @@ def index():
     return render_template("main.html")
 
 
-@app.route('/predict', methods=["POST"])
+@app.route('/predict',methods=["POST"])
 def get_image():
     canvasdata = request.form['canvasimg']
     # print(canvasdata)
@@ -32,15 +32,15 @@ def get_image():
 
     gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     gray_image = cv2.resize(gray_image, (28, 28), interpolation=cv2.INTER_LINEAR)
-    gray_image = gray_image / 255.0
-
+    gray_image = gray_image/255.0
+    
     gray_image = np.expand_dims(gray_image, axis=-1)
     img = np.expand_dims(gray_image, axis=0)
 
     print('Image received: {}'.format(img.shape))
     prediction = model.predict(img)
     cl = list(prediction[0])
-    print("Prediction : ", ascii_map["Character"][cl.index(max(cl))])
+    print("Prediction : ",ascii_map["Character"][cl.index(max(cl))])
 
     ## INITIAL TF VERSION -> 2.3.0
     # print(prediction)
@@ -48,5 +48,9 @@ def get_image():
     return render_template("main.html", value=ascii_map["Character"][cl.index(max(cl))])
 
 
+
+
+
 if __name__ == '__main__':
-    app.run(port=5000,host='0.0.0.0')
+    app.run(debug=True)
+            
